@@ -25,15 +25,15 @@ int main(void)
   };
 
   // Initialize pins PC8 & PC9
-  HAL_GPIO_Init(GPIOC, &init_config);
+  HAL_GPIO_Init(GPIOC, &initial_config);
   // Start PC8 high
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
 
-  while (true) {
+  while (1) {
     HAL_Delay(200);
 
     // Toggle Pins 8 and 9
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
   }
 }
 
