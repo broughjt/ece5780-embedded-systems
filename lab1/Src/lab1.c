@@ -25,27 +25,57 @@ int main(void)
     GPIO_SPEED_FREQ_LOW,
     GPIO_NOPULL
   };
-  /* GPIO_InitTypeDef button_config = { */
-  /*   GPIO_PIN_0, */
-  /*   GPIO_MODE_INPUT, */
-  /*   GPIO_SPEED_FREQ_LOW, */
-  /*   GPIO_PULLDOWN */
-  /* }; */
+  GPIO_InitTypeDef button_config = {
+    GPIO_PIN_0,
+    GPIO_MODE_INPUT,
+    GPIO_SPEED_FREQ_LOW,
+    GPIO_PULLDOWN
+  };
 
-  // Initialize LEDS, pins PC6-PC9
+  // Initialize LEDS, pins PC6 and PC7
   My_HAL_GPIO_Init(GPIOC, &leds_config);
-  // TODO:
   // Initialize User button, pin PA0
-  // My_HAL_GPIO_Init(GPIOA, &button_config);
+  My_HAL_GPIO_Init(GPIOA, &button_config);
 
-  // Start PC8 high
-  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
+  // Start PC6 high
+  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7, GPIO_PIN_SET);
+
 
   while (1) {
-    HAL_Delay(200);
+    // GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+    // HAL_Delay(200);
 
-    // Toggle Pins 8 and 9
-    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
+    uint32_t debouncer = 0;
+    int was_pressed = 0;
+    int t = 0;
+
+    HAL_Delay(5);
+
+    while (1) {
+      debouncer <<= 1;
+
+      GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+      
+      if (state == GPIO_PIN_SET) {
+        debouncer |= 0x01;
+      }
+      
+      if (debouncer == 0xFFFFFFFF) {
+        t = 1;
+        // Steady high
+      } else if (debouncer == 0x00000000) {
+        if (t) {
+          was_pressed = 1;
+        }
+        // Steady low
+      } else if (debouncer == 0x7FFFFFFF) {
+        // Transition to steady high
+      }
+    }
+
+    if (was_pressed) {
+        My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
+    }
   }
 }
 
