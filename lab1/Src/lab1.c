@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include "hal_gpio.h"
 
 void SystemClock_Config(void);
 
@@ -19,31 +20,32 @@ int main(void)
   My_HAL_RCC_GPIOC_CLK_ENABLE();
 
   GPIO_InitTypeDef leds_config = {
-    GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9,
+    GPIO_PIN_6 | GPIO_PIN_7,
     GPIO_MODE_OUTPUT_PP,
     GPIO_SPEED_FREQ_LOW,
     GPIO_NOPULL
   };
-  GPIO_InitTypeDef button_config = {
-    GPIO_PIN_0,
-    GPIO_MODE_INPUT,
-    GPIO_SPEED_FREQ_LOW,
-    GPIO_PULLDOWN
-  };
+  /* GPIO_InitTypeDef button_config = { */
+  /*   GPIO_PIN_0, */
+  /*   GPIO_MODE_INPUT, */
+  /*   GPIO_SPEED_FREQ_LOW, */
+  /*   GPIO_PULLDOWN */
+  /* }; */
 
   // Initialize LEDS, pins PC6-PC9
   My_HAL_GPIO_Init(GPIOC, &leds_config);
+  // TODO:
   // Initialize User button, pin PA0
-  My_HAL_GPIO_Init(GPIOA, &button_config);
+  // My_HAL_GPIO_Init(GPIOA, &button_config);
 
   // Start PC8 high
-  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
+  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
 
   while (1) {
     HAL_Delay(200);
 
     // Toggle Pins 8 and 9
-    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
   }
 }
 

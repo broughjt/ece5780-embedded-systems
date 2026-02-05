@@ -2,6 +2,8 @@
 #include <stm32f0xx_hal.h>
 #include <stm32f0xx_hal_gpio.h>
 
+#define GPIO_COUNT 16U
+
 uint32_t expand_bits(uint32_t x) {
     uint32_t y = x & 0xFFFF;
 
@@ -36,7 +38,7 @@ void My_HAL_GPIO_Init(GPIO_TypeDef *port, GPIO_InitTypeDef *config)
   port->OSPEEDR |= speed_bitmask;
 
   port->PUPDR &= ~pin_expanded;
-  port->PUPDR |= pupdr_bitmask;
+  port->PUPDR |= pull_bitmask;
 }
 
 /*
@@ -45,26 +47,46 @@ void My_HAL_GPIO_DeInit(GPIO_TypeDef  *GPIOx, uint32_t GPIO_Pin)
 }
 */
 
-/*
-GPIO_PinState My_HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
-{
-    return -1;
-}
-*/
 
-/*
-void My_HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState)
+GPIO_PinState My_HAL_GPIO_ReadPin(GPIO_TypeDef* port, uint16_t pin)
 {
-}
-*/
+  assert_param(IS_GPIO_PIN(pin));
 
-/*
-void My_HAL_GPIO_TogglePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+  GPIO_PinState status = ((port->IDR & pin) != (uint32_t)GPIO_PIN_RESET) ?
+    GPIO_PIN_SET :
+    GPIO_PIN_RESET;
+
+  return status;
+}
+
+void My_HAL_GPIO_WritePin(GPIO_TypeDef* port, uint16_t pin, GPIO_PinState state)
 {
-}
-*/
+  assert_param(IS_GPIO_PIN(pin));
+  assert_param(IS_GPIO_PIN_ACTION(state));
 
-My_HAL_RCC_GPIOC_CLK_ENABLE() {
+  if (state != GPIO_PIN_RESET)
+  {
+    port->BSRR = (uint32_t)pin;
+  }
+  else
+  {
+    port->BRR = (uint32_t)pin;
+  }
+}
+
+
+void My_HAL_GPIO_TogglePin(GPIO_TypeDef* port, uint16_t pin)
+{
+  uint32_t odr;
+
+  assert_param(IS_GPIO_PIN(pin));
+  odr = port->ODR;
+
+  /* Set selected pins that were at low level, and reset ones that were high */
+  port->BSRR = ((odr & pin) << GPIO_COUNT) | (~odr & pin);
+}
+
+void My_HAL_RCC_GPIOC_CLK_ENABLE() {
   SET_BIT(RCC->AHBENR, RCC_AHBENR_GPIOCEN);
   __IO uint32_t t = READ_BIT(RCC->AHBENR, RCC_AHBENR_GPIOCEN);
   UNUSED(t);
