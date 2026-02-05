@@ -15,25 +15,35 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  __HAL_RCC_GPIOC_CLK_ENABLE();
+  // __HAL_RCC_GPIOC_CLK_ENABLE();
+  My_HAL_RCC_GPIOC_CLK_ENABLE();
 
-  GPIO_InitTypeDef initial_config = {
-    GPIO_PIN_8 | GPIO_PIN_9,
+  GPIO_InitTypeDef leds_config = {
+    GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9,
     GPIO_MODE_OUTPUT_PP,
     GPIO_SPEED_FREQ_LOW,
     GPIO_NOPULL
   };
+  GPIO_InitTypeDef button_config = {
+    GPIO_PIN_0,
+    GPIO_MODE_INPUT,
+    GPIO_SPEED_FREQ_LOW,
+    GPIO_PULLDOWN
+  };
 
-  // Initialize pins PC8 & PC9
-  HAL_GPIO_Init(GPIOC, &initial_config);
+  // Initialize LEDS, pins PC6-PC9
+  My_HAL_GPIO_Init(GPIOC, &leds_config);
+  // Initialize User button, pin PA0
+  My_HAL_GPIO_Init(GPIOA, &button_config);
+
   // Start PC8 high
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
+  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
 
   while (1) {
     HAL_Delay(200);
 
     // Toggle Pins 8 and 9
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
   }
 }
 
