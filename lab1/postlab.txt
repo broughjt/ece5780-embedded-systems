@@ -1,0 +1,30 @@
+1. The lab describes the following registers
+
+- MODER: controls input/output mode
+- OTYPER: controls output type (push-pull or open drain)
+- OSPEEDR: controls output speed (low, medium, high)
+- PUPDRR: IO pull-up or pull-down
+
+2. Bits 0b11 set the mode to analog mode for that pin.
+
+3. The fourth bit of the upper half of the bit set / reset register (BSRR)
+
+4. We have
+
+0xAD | 0xC7 = 0xEF
+0xAD & 0xC7 = 0x85
+0xAD & ~(0xC7) = 0x28
+0xAD ^ 0xC7 = 0x6A
+
+5. Invert a bitmask with the only the 5th and 6th bits set, then bitwise and the register with the resulting value.
+
+6. According to the I/O AC characteristics table, there is a 2 MHz maximum
+frequency at the lowest OSPEEDR configuration value.
+
+7.
+
+- TIM1: the AHBENR register
+- DMA1: the DIER register
+- IC21: the I2C1EN register
+
+8. 5 commits

@@ -38,43 +38,99 @@ int main(void)
   My_HAL_GPIO_Init(GPIOA, &button_config);
 
   // Start PC6 high
-  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7, GPIO_PIN_SET);
+  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
 
+  /* while (1) { */
+  /*   // GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0); */
+  /*   // HAL_Delay(200); */
+
+  /*   uint32_t debouncer = 0; */
+  /*   int was_pressed = 0; */
+  /*   int t = 0; */
+
+  /*   HAL_Delay(20); */
+
+  /*   while (1) { */
+  /*     debouncer <<= 1; */
+
+  /*     GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0); */
+      
+  /*     if (state == GPIO_PIN_SET) { */
+  /*       debouncer |= 0x01; */
+  /*     } */
+      
+  /*     if (debouncer == 0xFFFFFFFF) { */
+  /*       t = 1; */
+  /*       // Steady high */
+  /*     } else if (debouncer == 0x00000000) { */
+  /*       if (t) { */
+  /*         was_pressed = 1; */
+  /*       } */
+  /*       // Steady low */
+  /*     } else if (debouncer == 0x7FFFFFFF) { */
+  /*       // Transition to steady high */
+  /*     } */
+  /*   } */
+
+  /*   if (was_pressed) { */
+  /*       My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7); */
+  /*   } */
+  /* } */
+
+  /* uint32_t debouncer = 0; */
+
+  /* while (1) { */
+  /*   debouncer <<= 1; */
+  /*   GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0); */
+
+  /*   if (state == GPIO_PIN_SET) { */
+  /*     debouncer |= 0x01; */
+  /*   } */
+    
+  /*   if (debouncer == 0xFFFFFFFF) { */
+  /*     // Steady high */
+  /*     My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7); */
+  /*   } else if (debouncer == 0x00000000) { */
+  /*     // Steady low */
+  /*   } else if (debouncer == 0x7FFFFFFF) { */
+  /*     // Transition to steady high */
+  /*   } */
+
+  /*   HAL_Delay(200); */
+  /* } */
+
+  /* while (1) { */
+  /*   GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0); */
+
+  /*   if (state == GPIO_PIN_SET) { */
+  /*     My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET); */
+  /*   } */
+
+  /*   HAL_Delay(10); */
+  /* } */
+
+  uint32_t debouncer = 0;
 
   while (1) {
-    // GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-    // HAL_Delay(200);
+    debouncer = (debouncer << 1);
 
-    uint32_t debouncer = 0;
-    int was_pressed = 0;
-    int t = 0;
+    GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 
-    HAL_Delay(5);
-
-    while (1) {
-      debouncer <<= 1;
-
-      GPIO_PinState state = My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-      
-      if (state == GPIO_PIN_SET) {
-        debouncer |= 0x01;
-      }
-      
-      if (debouncer == 0xFFFFFFFF) {
-        t = 1;
-        // Steady high
-      } else if (debouncer == 0x00000000) {
-        if (t) {
-          was_pressed = 1;
-        }
-        // Steady low
-      } else if (debouncer == 0x7FFFFFFF) {
-        // Transition to steady high
-      }
+    if (state == GPIO_PIN_SET) {
+      debouncer |= 0x01;
     }
 
-    if (was_pressed) {
-        My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
+    // If input signal is set/high
+    // Set lowest bit of bit-vector
+    if (debouncer == 0xFFFFFFFF) {
+      // This code triggers repeatedly when button is steady high!
+    }
+    if (debouncer == 0x00000000) {
+      // This code triggers repeatedly when button is steady low!
+    }
+    if (debouncer == 0x7FFFFFFF) {
+      My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
+      // This code triggers only once when transitioning to steady high!
     }
   }
 }
