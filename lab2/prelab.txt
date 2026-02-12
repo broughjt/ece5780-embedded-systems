@@ -1,0 +1,29 @@
+1. What is the purpose of the NVIC peripheral?
+
+The NVIC controls coordinates the handling of interrupts throughout the system.
+
+2. What is the difference between interrupt tail-chaining and nesting?
+
+Tail-chaining occurs when interrupt handlers execute in succession according to
+their hardware priority. Nesting allows more important handlers to interrupt
+lower priority handlers.
+
+3. In what file are the CMSIS libraries that control the NVIC?
+
+The core_cm0.h file.
+
+4. What is the purpose of the EXTI peripheral?
+
+It allows non-peripheral sources to trigger interrupts.
+
+5. What is the purpose of the SYSCFG pin multiplexers?
+
+Select which pins to connect to the limited EXTI inputs.
+
+6. What file has the defined names for interrupt numbers?
+
+The stm32f0xb.h file.
+
+7. What file has the Vector table implementation?
+
+The startup_stm32f072xb.s file.

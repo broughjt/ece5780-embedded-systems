@@ -14,9 +14,31 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  while (1)
-  {
- 
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  // 2.2
+  GPIO_InitTypeDef button_config = {
+    GPIO_PIN_0,
+    GPIO_MODE_INPUT,
+    GPIO_SPEED_FREQ_LOW,
+    GPIO_PULLDOWN
+  };
+  HAL_GPIO_Init(GPIOC, &button_config);
+
+  GPIO_InitTypeDef leds_config = {
+    GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_9,
+    GPIO_MODE_OUTPUT_PP,
+    GPIO_SPEED_FREQ_LOW,
+    GPIO_NOPULL
+  };
+  HAL_GPIO_Init(GPIOC, &leds_config);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7, GPIO_PIN_SET);
+
+  while (1) {
+    HAL_Delay(500);
+
+    // Toggle Pins 8 and 9
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
   }
   return -1;
 }
