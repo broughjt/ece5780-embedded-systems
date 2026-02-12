@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include <assert.h>
 
 void SystemClock_Config(void);
 
@@ -15,30 +16,46 @@ int main(void)
   SystemClock_Config();
 
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  // 2.2
+  // 2.2 button
   GPIO_InitTypeDef button_config = {
     GPIO_PIN_0,
     GPIO_MODE_INPUT,
     GPIO_SPEED_FREQ_LOW,
     GPIO_PULLDOWN
   };
-  HAL_GPIO_Init(GPIOC, &button_config);
+  HAL_GPIO_Init(GPIOA, &button_config);
 
   GPIO_InitTypeDef leds_config = {
-    GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_9,
+    GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9,
     GPIO_MODE_OUTPUT_PP,
     GPIO_SPEED_FREQ_LOW,
     GPIO_NOPULL
   };
   HAL_GPIO_Init(GPIOC, &leds_config);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_9, GPIO_PIN_SET);
+
+  // 2.2 EXTI configuration
+  EXTI->RTSR |= EXTI_RTSR_TR0;
+  EXTI->IMR |= EXTI_IMR_MR0;
+
+  // TODO: Check if we need `RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;` instead
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+
+  assert((SYSCFG->EXTICR[0] & SYSCFG_EXTICR1_EXTI0) == 0);
+  SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI0;
+  assert((SYSCFG->EXTICR[0] & SYSCFG_EXTICR1_EXTI0) == 0);
+
+  // 2.4
+  NVIC_EnableIRQ(EXTI0_1_IRQn);
+  NVIC_SetPriority(EXTI0_1_IRQn, 1);
 
   while (1) {
     HAL_Delay(500);
 
-    // Toggle Pins 8 and 9
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
+    // Toggle Pin 9
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
   }
   return -1;
 }
@@ -105,3 +122,10 @@ void assert_failed(uint8_t *file, uint32_t line)
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 }
 #endif /* USE_FULL_ASSERT */
+
+void EXTI0_1_IRQHandler(void)
+{
+  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9);
+
+  EXTI->PR |= EXTI_PR_PR0;
+}

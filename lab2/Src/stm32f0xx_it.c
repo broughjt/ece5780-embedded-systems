@@ -49,13 +49,13 @@ void SysTick_Handler(void)
 {
   HAL_IncTick();
 
-  if (blue_led_count == 200) {
-    blue_led_count = 0;
+  /* if (blue_led_count == 200) { */
+  /*   blue_led_count = 0; */
 
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
-  } else {
-    blue_led_count++;
-  }
+  /*   HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7); */
+  /* } else { */
+  /*   blue_led_count++; */
+  /* } */
 }
 
 /******************************************************************************/
