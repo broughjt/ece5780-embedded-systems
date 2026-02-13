@@ -50,12 +50,14 @@ int main(void)
   // 2.4
   NVIC_EnableIRQ(EXTI0_1_IRQn);
   NVIC_SetPriority(EXTI0_1_IRQn, 1);
+  // TODO: Adding this because blue led is frozen, but it should be taking
+  // higher priority. Seems to work
+  NVIC_SetPriority(SysTick_IRQn, 0);
 
   while (1) {
     HAL_Delay(500);
 
-    // Toggle Pin 9
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
   }
   return -1;
 }
@@ -125,6 +127,12 @@ void assert_failed(uint8_t *file, uint32_t line)
 
 void EXTI0_1_IRQHandler(void)
 {
+  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9);
+
+  for (volatile int i = 0; i < 1500000; i++) {
+    // Empty loop -- volatile prevents optimization
+  }
+
   HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9);
 
   EXTI->PR |= EXTI_PR_PR0;
