@@ -49,7 +49,7 @@ int main(void)
 
   // 2.4
   NVIC_EnableIRQ(EXTI0_1_IRQn);
-  NVIC_SetPriority(EXTI0_1_IRQn, 1);
+  NVIC_SetPriority(EXTI0_1_IRQn, 3);
   // TODO: Part of part 2.7
   NVIC_SetPriority(SysTick_IRQn, 2);
 
