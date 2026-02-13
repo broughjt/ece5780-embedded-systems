@@ -50,9 +50,8 @@ int main(void)
   // 2.4
   NVIC_EnableIRQ(EXTI0_1_IRQn);
   NVIC_SetPriority(EXTI0_1_IRQn, 1);
-  // TODO: Adding this because blue led is frozen, but it should be taking
-  // higher priority. Seems to work
-  NVIC_SetPriority(SysTick_IRQn, 0);
+  // TODO: Part of part 2.7
+  NVIC_SetPriority(SysTick_IRQn, 2);
 
   while (1) {
     HAL_Delay(500);
