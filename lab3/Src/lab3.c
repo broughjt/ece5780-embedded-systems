@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include "timer.h"
 
 void SystemClock_Config(void);
 
@@ -13,6 +14,22 @@ int main(void)
   HAL_Init();
   /* Configure the system clock */
   SystemClock_Config();
+
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  GPIO_InitTypeDef leds_config = {
+      GPIO_PIN_8 | GPIO_PIN_9,
+      GPIO_MODE_OUTPUT_PP,
+      GPIO_SPEED_FREQ_LOW,
+      GPIO_NOPULL
+  };
+  HAL_GPIO_Init(GPIOC, &leds_config);
+
+  // Set green LED on initially (orange off)
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+
+  init_timer2();
 
   while (1)
   {
