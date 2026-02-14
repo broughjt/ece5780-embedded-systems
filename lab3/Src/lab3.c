@@ -17,11 +17,20 @@ int main(void)
 
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
+  GPIO_InitTypeDef leds_config_pwm = {
+      GPIO_PIN_6 | GPIO_PIN_7,
+      GPIO_MODE_AF_PP,
+      GPIO_NOPULL,
+      GPIO_SPEED_FREQ_LOW,
+      GPIO_AF0_TIM3
+  };
+  HAL_GPIO_Init(GPIOC, &leds_config_pwm);
+
   GPIO_InitTypeDef leds_config = {
       GPIO_PIN_8 | GPIO_PIN_9,
       GPIO_MODE_OUTPUT_PP,
+      GPIO_NOPULL,
       GPIO_SPEED_FREQ_LOW,
-      GPIO_NOPULL
   };
   HAL_GPIO_Init(GPIOC, &leds_config);
 
@@ -30,6 +39,7 @@ int main(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
   init_timer2();
+  init_timer3();
 
   while (1)
   {
