@@ -54,3 +54,12 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32f0xx.s).                    */
 /******************************************************************************/
 
+extern volatile uint8_t rx_data;
+extern volatile uint8_t rx_flag;
+
+void USART3_4_IRQHandler(void)
+{
+  rx_data = USART3->RDR; /* reading RDR clears RXNE automatically */
+  rx_flag = 1;
+}
+
