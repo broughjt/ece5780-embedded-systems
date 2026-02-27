@@ -2,6 +2,10 @@
 #include "stm32f0xx_hal.h"
 
 void SystemClock_Config(void);
+void USART3_Init(void);
+void transmit_char(char c);
+
+UART_HandleTypeDef huart3;
 
 /**
   * @brief  The application entry point.
@@ -14,11 +18,58 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  USART3_Init();
+
   while (1)
   {
- 
+    transmit_char('A');
+    HAL_Delay(500);
   }
   return -1;
+}
+
+/**
+  * @brief  Initialize USART3 on PC10 (TX) and PC11 (RX) at 115200 baud.
+  * @retval None
+  */
+void USART3_Init(void)
+{
+  // Step 2: Configure PC10 (USART3_TX) and PC11 (USART3_RX) pins
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  GPIO_InitTypeDef gpio_config = {0};
+  gpio_config.Pin       = GPIO_PIN_10 | GPIO_PIN_11;
+  gpio_config.Mode      = GPIO_MODE_AF_PP;
+  gpio_config.Pull      = GPIO_NOPULL;
+  gpio_config.Speed     = GPIO_SPEED_FREQ_LOW;
+  gpio_config.Alternate = GPIO_AF1_USART3;
+  HAL_GPIO_Init(GPIOC, &gpio_config);
+
+  // Step 3: Initialize USART3 at 115200 baud, 8N1
+  __HAL_RCC_USART3_CLK_ENABLE();
+
+  huart3.Instance            = USART3;
+  huart3.Init.BaudRate       = 115200;
+  huart3.Init.WordLength     = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits       = UART_STOPBITS_1;
+  huart3.Init.Parity         = UART_PARITY_NONE;
+  huart3.Init.Mode           = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl      = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling   = UART_OVERSAMPLING_16;
+  HAL_UART_Init(&huart3);
+}
+
+/**
+  * @brief  Transmit a single character over USART3 (blocking).
+  * @param  c: character to send
+  * @retval None
+  */
+void transmit_char(char c)
+{
+  /* Wait until the transmit data register is empty */
+  while (!(USART3->ISR & USART_ISR_TXE));
+  /* Writing to TDR clears TXE automatically */
+  USART3->TDR = c;
 }
 
 /**
