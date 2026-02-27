@@ -3,7 +3,9 @@
 
 void SystemClock_Config(void);
 void USART3_Init(void);
+void LED_Init(void);
 void transmit_char(char c);
+void transmit_string(const char *str);
 
 UART_HandleTypeDef huart3;
 
@@ -19,11 +21,22 @@ int main(void)
   SystemClock_Config();
 
   USART3_Init();
+  LED_Init();
 
   while (1)
   {
-    transmit_char('A');
-    HAL_Delay(500);
+    /* Wait until a character is received */
+    while (!(USART3->ISR & USART_ISR_RXNE));
+    char c = USART3->RDR;
+
+    switch (c)
+    {
+      case 'r': HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6); break; /* red    */
+      case 'b': HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7); break; /* blue   */
+      case 'o': HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8); break; /* orange */
+      case 'g': HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9); break; /* green  */
+      default:  transmit_string("Error: unknown command\r\n"); break;
+    }
   }
   return -1;
 }
@@ -70,6 +83,39 @@ void transmit_char(char c)
   while (!(USART3->ISR & USART_ISR_TXE));
   /* Writing to TDR clears TXE automatically */
   USART3->TDR = c;
+}
+
+/**
+  * @brief  Initialize PC6 (red), PC7 (blue), PC8 (orange), PC9 (green) as outputs.
+  * @retval None
+  */
+void LED_Init(void)
+{
+  /* GPIOC clock already enabled in USART3_Init, but safe to call again */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  GPIO_InitTypeDef gpio_config = {0};
+  gpio_config.Pin   = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
+  gpio_config.Mode  = GPIO_MODE_OUTPUT_PP;
+  gpio_config.Pull  = GPIO_NOPULL;
+  gpio_config.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &gpio_config);
+
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7, GPIO_PIN_SET);
+}
+
+/**
+  * @brief  Transmit a null-terminated string over USART3 (blocking).
+  * @param  str: pointer to the string to send
+  * @retval None
+  */
+void transmit_string(const char *str)
+{
+  while (*str != '\0')
+  {
+    transmit_char(*str);
+    str++;
+  }
 }
 
 /**
