@@ -19,16 +19,26 @@ int main(void)
 
   // Read WHO_AM_I register (0x0F) from L3GD20 (slave address 0x6B).
   // Expected value is 0xD4.
-  uint8_t who_am_i = I2C2_ReadRegister(0x6B, 0x0F);
+  uint8_t who_am_i = I2C2_ReadRegister(0x69, 0x0F);
 
-  if (who_am_i == 0xD4)
+  if (who_am_i == 0xD3)
   {
-    // Success: light green LED (PC9)
+    // Success: green LED (PC9)
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
+  }
+  else if (who_am_i == 0xFF)
+  {
+    // NACK on write address: orange LED (PC8)
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
+  }
+  else if (who_am_i == 0xFE)
+  {
+    // NACK on read restart: blue LED (PC7)
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
   }
   else
   {
-    // Failure: light red LED (PC6)
+    // Wrong value returned: red LED (PC6)
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
   }
 
@@ -70,7 +80,7 @@ void GPIO_Init(void)
   // PB14: slave address select pin — output, push-pull, HIGH
   gpio.Pin   = GPIO_PIN_14;
   gpio.Mode  = GPIO_MODE_OUTPUT_PP;
-  gpio.Speed = GPIO_SPEED_FREQ_LOW;
+  // gpio.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &gpio);
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 
@@ -81,29 +91,29 @@ void GPIO_Init(void)
 
   // PB15: leave in input mode
   gpio.Pin  = GPIO_PIN_15;
-  gpio.Mode = GPIO_MODE_INPUT;
+  // gpio.Mode = GPIO_MODE_INPUT;
+  gpio.Mode = GPIO_MODE_AF_OD;
   HAL_GPIO_Init(GPIOB, &gpio);
 
   // PC6 (red), PC7 (blue), PC8 (orange), PC9 (green) — LED outputs
-  gpio.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
+  gpio.Pin  = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
+  gpio.Mode = GPIO_MODE_OUTPUT_PP;
   HAL_GPIO_Init(GPIOC, &gpio);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, GPIO_PIN_RESET);
 }
 
 /**
- * @brief Initialize I2C2 in master mode at 100 kHz (standard mode).
+ * @brief Initialize I2C2 in master mode at 100 kHz.
  *
- * TIMINGR values from Figure 5.4 for 8 MHz system clock, 100 kHz SM:
- *   PRESC=1, SCLDEL=4, SDADEL=2, SCLH=0xF, SCLL=0x13 → 0x10420F13
+ * TIMINGR values from Figure 5.4
+ * PRESC=1, SCLDEL=4, SDADEL=2, SCLH=0xF, SCLL=0x13
  */
 void I2C2_Init(void)
 {
   __HAL_RCC_I2C2_CLK_ENABLE();
 
-  // Configure timing for 100 kHz standard-mode at 8 MHz
   I2C2->TIMINGR = (1U << 28) | (4U << 20) | (2U << 16) | (0xFU << 8) | 0x13U;
 
-  // Enable the I2C peripheral (locks system-wide config registers)
   I2C2->CR1 |= I2C_CR1_PE;
 }
 
@@ -153,7 +163,7 @@ uint8_t I2C2_ReadRegister(uint8_t slave_addr, uint8_t reg_addr)
   {
     I2C2->ICR |= I2C_ICR_NACKCF;
     I2C2->CR2 |= I2C_CR2_STOP;
-    return 0xFF;
+    return 0xFE;
   }
 
   // Step 7: Wait for transfer complete
