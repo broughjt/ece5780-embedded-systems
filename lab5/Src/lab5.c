@@ -14,6 +14,9 @@ int main(void)
   GPIO_Init();
   I2C2_Init();
 
+  // Give the gyro time to switch into I2C mode after PC0 goes high
+  // HAL_Delay(10);
+
   // Read WHO_AM_I register (0x0F) from L3GD20 (slave address 0x6B).
   // Expected value is 0xD4.
   uint8_t who_am_i = I2C2_ReadRegister(0x6B, 0x0F);
@@ -75,6 +78,11 @@ void GPIO_Init(void)
   gpio.Pin = GPIO_PIN_0;
   HAL_GPIO_Init(GPIOC, &gpio);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
+
+  // PB15: leave in input mode
+  gpio.Pin  = GPIO_PIN_15;
+  gpio.Mode = GPIO_MODE_INPUT;
+  HAL_GPIO_Init(GPIOB, &gpio);
 
   // PC6 (red), PC7 (blue), PC8 (orange), PC9 (green) — LED outputs
   gpio.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
