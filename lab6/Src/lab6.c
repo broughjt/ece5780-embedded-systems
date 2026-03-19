@@ -4,6 +4,13 @@
 void SystemClock_Config(void);
 void GPIO_Init(void);
 void ADC_Init(void);
+void DAC_Init(void);
+
+// Sine wave: 8-bit, 32 samples/cycle
+static const uint8_t sine_table[32] = {
+  127,151,175,197,216,232,244,251,254,251,244,
+  232,216,197,175,151,127,102,78,56,37,21,9,2,0,2,9,21,37,56,78,102
+};
 
 int main(void)
 {
@@ -12,15 +19,25 @@ int main(void)
 
   GPIO_Init();
   ADC_Init();
+  DAC_Init();
+
+  uint32_t dac_idx = 0;
 
   while (1)
   {
-    uint8_t adc_val = (uint8_t)ADC1->DR;
+    // Checkoff 6.1: read potentiometer, drive LEDs
+    /* uint8_t adc_val = (uint8_t)ADC1->DR; */
 
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6,  adc_val >  64 ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,  adc_val > 128 ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8,  adc_val > 191 ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9,  adc_val > 220 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    /* HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6,  adc_val >  64 ? GPIO_PIN_SET : GPIO_PIN_RESET); */
+    /* HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,  adc_val > 128 ? GPIO_PIN_SET : GPIO_PIN_RESET); */
+    /* HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8,  adc_val > 191 ? GPIO_PIN_SET : GPIO_PIN_RESET); */
+    /* HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9,  adc_val > 220 ? GPIO_PIN_SET : GPIO_PIN_RESET); */
+
+    // Checkoff 6.2: output sine wave using DAC on PA4
+    DAC->DHR8R1 = sine_table[dac_idx];
+    dac_idx = (dac_idx + 1) % 32;
+
+    HAL_Delay(1);
   }
   return -1;
 }
@@ -44,11 +61,25 @@ void GPIO_Init(void)
   gpio.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &gpio);
 
+  // PA4: DAC_OUT1 analog output, no pull-up/down
+  gpio.Pin  = GPIO_PIN_4;
+  gpio.Mode = GPIO_MODE_ANALOG;
+  gpio.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &gpio);
+
   // PC6 (red), PC7 (blue), PC8 (orange), PC9 (green) — LED outputs
   gpio.Pin  = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
   gpio.Mode = GPIO_MODE_OUTPUT_PP;
   HAL_GPIO_Init(GPIOC, &gpio);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, GPIO_PIN_RESET);
+}
+
+void DAC_Init(void)
+{
+  RCC->APB1ENR |= RCC_APB1ENR_DACEN;
+
+  // Enable channel 1, no hardware trigger (TEN1=0)
+  DAC->CR |= DAC_CR_EN1;
 }
 
 void ADC_Init(void)
