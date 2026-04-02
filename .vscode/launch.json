@@ -14,23 +14,28 @@
             "runEntry": "main",
             "imagesAndSymbols": [
                 {
-                    "imageFileName": "${command:cmake.launchTargetPath}"
+                    // "imageFileName": "${command:cmake.launchTargetPath}"
+                  "imageFileName": "${workspaceRoot}/build/lab7/lab7.elf"
                 }
             ]
         },
         {
             "cwd": "${workspaceRoot}",
-            "executable": "${command:cmake.launchTargetPath}",
+            // "executable": "${command:cmake.launchTargetPath}",
+            "executable": "${workspaceRoot}/build/lab7/lab7.elf",
             "name": "RTT graphing",
             "request": "launch",
             "type": "cortex-debug",
+            "openOCDLaunchCommands": [],
             "servertype": "openocd",
             "configFiles": [
                 "board/stm32f0discovery.cfg"
             ],
             "runToEntryPoint": "main",
-            "showDevDebugOutput": "none",
-            "svdPath": "STM32F072x.svd",
+            "showDevDebugOutput": "raw",
+            "svdPath": "${workspaceRoot}/STM32F0x2.svd",
+            "gdbPath": "/nix/store/h2r7c7sq42jziins82y5rk7ws7gav2jv-gcc-arm-embedded-15.2.rel1/bin/arm-none-eabi-gdb",
+            // "serverpath": "",
             "rttConfig": {
                 "enabled": true,
                 "address": "auto",
@@ -39,7 +44,7 @@
                         "label": "duty_cycle",
                         "port": 0,
                         "type": "graph",
-                        "encoding":"unsigned",
+                        "encoding": "unsigned",
                         "graphId": "1",
                         "scale": 1
                     },
@@ -47,7 +52,7 @@
                         "label": "target_rpm",
                         "port": 1,
                         "type": "graph",
-                        "encoding":"signed",
+                        "encoding": "signed",
                         "graphId": "2",
                         "scale": 1
                     },
@@ -55,42 +60,38 @@
                         "label": "motor_speed",
                         "port": 2,
                         "type": "graph",
-                        "encoding":"signed",
+                        "encoding": "signed",
                         "graphId": "3",
                         "scale": 1
                     }
                 ]
             },
-            "preLaunchTask": {
-                "type": "PlatformIO",
-                "task": "Pre-Debug (lab1)"
-            },
             "graphConfig": [
                 {
                     "label": "Graph 1",
-                    "timespan": 5,
+                    "timespan": 1,
                     "type": "realtime",
                     "annotate": false,
-                    "maximum": 256,
+                    "maximum": 120,
                     "minimum": 0,
                     "plots": [
                         {
-                            "graphId": "1", 
+                            "graphId": "1",
                             "label": "duty_cycle",
                             "color": "#53753c"
                         },
                         {
-                            "graphId": "2", 
+                            "graphId": "2",
                             "label": "target_rpm",
                             "color": "#955f20"
                         },
                         {
-                            "graphId": "3", 
+                            "graphId": "3",
                             "label": "motor_speed",
                             "color": "#B57EDC"
                         }
                     ]
-                },
+                }
             ]
         }
     ]

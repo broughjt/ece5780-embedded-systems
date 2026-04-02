@@ -2,6 +2,8 @@
 #include "stm32f0xx_hal.h"
 #include "stm32f0xx_it.h"
 
+extern void Lab7_Systick_Callback(void);
+
 /******************************************************************************/
 /*           Cortex-M0 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
@@ -45,6 +47,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   HAL_IncTick();
+  Lab7_Systick_Callback();
 }
 
 /******************************************************************************/

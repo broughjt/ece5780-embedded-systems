@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+void Lab7_Systick_Callback(void);
 void Error_Handler(void);
 
 #ifdef __cplusplus
